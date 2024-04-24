@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <h1 style="text-align: center;color: blueviolet;font-size: larger;font-family: Verdana, Geneva, Tahoma, sans-serif;font-weight: bold;">Bookmark Website</h1>
+        <label for="websitelist"><h2>List of Website</h2></label>
+        <form id="websitelist">
+            <label for="title">Website Title:</label>
+            <input type="text" id="title"> 
+            <label for="link">Website URL:</label>
+            <input type="url" id="link">
+            <button type="submit" id="submitbutn">ADD</button>
+        </form>
+        <ul id="listofurl"></ul>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.4/axios.min.js"></script>
+        <script>
+            const CRUD = "https://crudcrud.com/api/4bfe2a470551470a9d19e9bfe71c61f3/addtolist";
+            
+            const button = document.getElementById("submitbutn");
+            button.addEventListener('click', addto);
+
+           
+            window.addEventListener('load', async () => {
+                try {
+                    const response = await axios.get(CRUD);
+                    const data = response.data;
+                    data.forEach(obj => addtoui(obj));
+                } catch (error) {
+                    console.error("Error fetching data:", error);
+                }
+            });
+
+            async function addto(event) {
+                event.preventDefault();
+                const obj = {
+                    "Title": document.getElementById("title").value,
+                    "Url": document.getElementById("link").value
+                };
+
+                try {
+                    const result = await axios.post(CRUD, obj);
+                    console.log(result.data);
+                    addtoui(result.data);
+                } catch (error) {
+                    console.error("Error adding bookmark:", error);
+                }
+            }
+
+            function addtoui(obj) {
+                const link = document.getElementById('listofurl');
+                const linktext = document.createElement('li');
+                const anchor = document.createElement('a'); 
+                anchor.textContent = obj.Title + ' > ' + obj.Url;
+                anchor.href = obj.Url; 
+                anchor.target = "_blank"; 
+                linktext.appendChild(anchor); 
+
+                const Delete = document.createElement('button');
+                Delete.textContent = "Delete";
+                Delete.addEventListener('click', async function (event) {
+                    event.preventDefault();
+                    linktext.remove();
+                    try {
+                        await axios.delete(`${CRUD_URL}/${obj._id}`);
+                    } catch (error) {
+                        console.error("Error deleting bookmark:", error);
+                    }
+                });
+
+                linktext.appendChild(Delete);
+                link.appendChild(linktext);
+            }
+        </script>
+    </body>
+</html>
